@@ -6,7 +6,6 @@
 //
 
 import SpriteKit
-import UIKit
 
 class GameOverScene: SKScene {
     // MARK: - Life's cycle

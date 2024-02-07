@@ -1,12 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "InvaderA_00.png",
+      "filename" : "invaderA_00.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "InvaderA_00@2x.png",
+      "filename" : "invaderA_00@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

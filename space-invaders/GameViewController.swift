@@ -5,9 +5,7 @@
 //  Created by Arturo Carretero Calvo on 7/2/24.
 //
 
-import GameplayKit
 import SpriteKit
-import UIKit
 
 class GameViewController: UIViewController {
     // MARK: - Life's cycle

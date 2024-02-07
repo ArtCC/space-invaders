@@ -5,7 +5,7 @@
 //  Created by Arturo Carretero Calvo on 7/2/24.
 //
 
-import UIKit
+import SpriteKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
