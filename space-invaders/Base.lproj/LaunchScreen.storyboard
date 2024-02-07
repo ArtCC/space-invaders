@@ -15,22 +15,19 @@
                         <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="x03-S7-tID">
-                                <rect key="frame" x="35" y="336.66666666666663" width="360" height="258.66666666666663"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="x03-S7-tID">
+                                <rect key="frame" x="35" y="366" width="360" height="200"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" secondItem="x03-S7-tID" secondAttribute="height" multiplier="323:232" id="P4t-wI-2qQ"/>
+                                    <constraint firstAttribute="width" constant="360" id="7fb-3D-ssO"/>
+                                    <constraint firstAttribute="height" constant="200" id="w5z-vY-60t"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="x03-S7-tID" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="9Td-5m-Sog"/>
-                            <constraint firstItem="x03-S7-tID" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="AAV-qM-kKl"/>
-                            <constraint firstItem="x03-S7-tID" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="35" id="IYv-8S-y1K"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="x03-S7-tID" secondAttribute="trailing" constant="35" id="JU1-AH-Gi7"/>
-                            <constraint firstItem="x03-S7-tID" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="jdp-6k-ULS"/>
-                            <constraint firstItem="x03-S7-tID" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="sAP-vW-raU"/>
+                            <constraint firstItem="x03-S7-tID" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="8Th-W6-USE"/>
+                            <constraint firstItem="x03-S7-tID" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="zgv-eY-1Ev"/>
                         </constraints>
                     </view>
                 </viewController>

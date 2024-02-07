@@ -5,37 +5,56 @@
 //  Created by Arturo Carretero Calvo on 7/2/24.
 //
 
-import UIKit
-import SpriteKit
 import GameplayKit
+import SpriteKit
+import UIKit
 
 class GameViewController: UIViewController {
+    // MARK: - Life's cycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         if let view = self.view as! SKView? {
-            if let scene = SKScene(fileNamed: "GameScene") {
-                scene.scaleMode = .aspectFill
-
-                view.presentScene(scene)
-            }
+            let scene = StartScene(size: view.frame.size)
 
             view.isMultipleTouchEnabled = true
             view.ignoresSiblingOrder = true
-            view.showsFPS = false
-            view.showsNodeCount = false
+            view.presentScene(scene)
         }
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationWillResignActive),
+                                               name: UIApplication.willResignActiveNotification,
+                                               object: nil)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(applicationDidBecomeActive),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
     }
 
+    // MARK: - Override
+
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
-        } else {
-            return .all
-        }
+        .portrait
     }
 
     override var prefersStatusBarHidden: Bool {
         true
+    }
+
+    // MARK: - Notifications
+
+    @objc func applicationWillResignActive() {
+        if let view = self.view as! SKView? {
+            view.isPaused = true
+        }
+    }
+
+    @objc func applicationDidBecomeActive() {
+        if let view = self.view as! SKView? {
+            view.isPaused = false
+        }
     }
 }
