@@ -76,7 +76,7 @@ extension GameScene {
 
     func setupPlayerControls() {
         joystickBase.name = Nodes.joystickBase.rawValue
-        joystickBase.position = CGPoint(x: 80, y: 250)
+        joystickBase.position = CGPoint(x: 80, y: 80)
         joystickBase.zPosition = 5.0
         joystickBase.alpha = 0.2
         joystickBase.setScale(0.3)
