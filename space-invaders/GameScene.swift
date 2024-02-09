@@ -64,7 +64,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var invaderMovementDirection: InvaderMovementDirection = .right
     var timeOfLastMove: CFTimeInterval = 0
     var timePerMove: CFTimeInterval = 1
-    var tapQueue = [Int]()
     var contactQueue = [SKPhysicsContact]()
     var score: Int = 0
     var selectedNodes: [UITouch: SKSpriteNode] = [:]
@@ -92,7 +91,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
 
         moveInvaders(forUpdate: currentTime)
-        processUserTaps(forUpdate: currentTime)
         fireInvaderBullets(forUpdate: currentTime)
         processContacts(forUpdate: currentTime)
 
@@ -166,7 +164,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
 
-        let ratio: CGFloat = CGFloat(self.timePerMove / timePerMove)
+        let ratio = CGFloat(self.timePerMove / timePerMove)
 
         self.timePerMove = timePerMove
 
@@ -214,15 +212,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if let index = contactQueue.firstIndex(of: $0) {
                 contactQueue.remove(at: index)
             }
-        }
-    }
-
-    func processUserTaps(forUpdate currentTime: CFTimeInterval) {
-        tapQueue.forEach {
-            if $0 == 1 {
-                fireShipBullets()
-            }
-            tapQueue.remove(at: 0)
         }
     }
 

@@ -24,7 +24,7 @@ extension GameScene {
                     selectedNodes[touch] = node
                 } else if node.name == Nodes.firePad.rawValue {
                     if let touch = touches.first, touch.tapCount == 1 {
-                        tapQueue.append(1)
+                        fireShipBullets()
                     }
                 }
             }
