@@ -9,4 +9,4 @@
 "start.scene.score.text" = "Score: %@";
 "game.scene.score.text" = "Score: %04u";
 "game.over.scene.win.text" = "You win!";
-"game.over.scene.lose.text" = "You lose!";
+"game.over.scene.lose.text" = "Game Over";
