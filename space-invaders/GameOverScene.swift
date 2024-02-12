@@ -37,7 +37,9 @@ class GameOverScene: SKScene {
         let gameOverLabel = SKLabelNode(fontNamed: Constants.Fonts.courier)
         gameOverLabel.fontSize = 50
         gameOverLabel.fontColor = .white
-        gameOverLabel.text = isWin ? "¡Has ganado!" : "¡Has perdido!"
+        gameOverLabel.text = isWin ?
+        NSLocalizedString("game.over.scene.win.text", comment: "") :
+        NSLocalizedString("game.over.scene.lose.text", comment: "")
         gameOverLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)
 
         addChild(gameOverLabel)

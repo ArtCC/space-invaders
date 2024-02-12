@@ -102,7 +102,7 @@ private extension GameScene {
         scoreLabel.name = Nodes.scoreHud.rawValue
         scoreLabel.fontSize = 25
         scoreLabel.fontColor = .red
-        scoreLabel.text = String(format: "Puntuación: %04u", 0)
+        scoreLabel.text = String(format: NSLocalizedString("game.scene.score.text", comment: ""), 0)
         scoreLabel.position = CGPoint(
             x: frame.size.width / 2,
             y: size.height - (60 + scoreLabel.frame.size.height)
@@ -330,7 +330,7 @@ private extension GameScene {
         score += points
 
         if let score = childNode(withName: Nodes.scoreHud.rawValue) as? SKLabelNode {
-            score.text = String(format: "Puntuación: %04u", self.score)
+            score.text = String(format: NSLocalizedString("game.scene.score.text", comment: ""), self.score)
         }
 
         ScoreManager.saveScore(score)

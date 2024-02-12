@@ -14,6 +14,7 @@
 		801346A62B73C7020049E476 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801346A52B73C7020049E476 /* GameOverScene.swift */; };
 		801346A82B73CF340049E476 /* StartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801346A72B73CF340049E476 /* StartScene.swift */; };
 		808D0E952B7A7F61008D057E /* ScoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808D0E942B7A7F61008D057E /* ScoreManager.swift */; };
+		808D0E982B7A8592008D057E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 808D0E9A2B7A8592008D057E /* Localizable.strings */; };
 		80CA49382B7A6C0300374DB2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80CA49372B7A6C0300374DB2 /* Constants.swift */; };
 		80D511622B73A5E9005E923C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D511612B73A5E9005E923C /* AppDelegate.swift */; };
 		80D511682B73A5E9005E923C /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D511672B73A5E9005E923C /* GameScene.swift */; };
@@ -31,6 +32,8 @@
 		801346A52B73C7020049E476 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		801346A72B73CF340049E476 /* StartScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartScene.swift; sourceTree = "<group>"; };
 		808D0E942B7A7F61008D057E /* ScoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreManager.swift; sourceTree = "<group>"; };
+		808D0E992B7A8592008D057E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		808D0E9B2B7A859C008D057E /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		80CA49372B7A6C0300374DB2 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		80D5115E2B73A5E9005E923C /* space-invaders.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "space-invaders.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		80D511612B73A5E9005E923C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -100,6 +103,7 @@
 				80D511702B73A5EA005E923C /* LaunchScreen.storyboard */,
 				80D5116B2B73A5E9005E923C /* Main.storyboard */,
 				80D5116E2B73A5EA005E923C /* Assets.xcassets */,
+				808D0E9A2B7A8592008D057E /* Localizable.strings */,
 				8013469B2B73B7180049E476 /* Resources */,
 			);
 			path = "space-invaders";
@@ -147,6 +151,7 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
 			);
 			mainGroup = 80D511552B73A5E9005E923C;
 			productRefGroup = 80D5115F2B73A5E9005E923C /* Products */;
@@ -168,6 +173,7 @@
 				80D5116F2B73A5EA005E923C /* Assets.xcassets in Resources */,
 				80D511722B73A5EA005E923C /* LaunchScreen.storyboard in Resources */,
 				801346A42B73B72A0049E476 /* InvaderHit.wav in Resources */,
+				808D0E982B7A8592008D057E /* Localizable.strings in Resources */,
 				801346A22B73B72A0049E476 /* ShipBullet.wav in Resources */,
 				801346A12B73B72A0049E476 /* InvaderBullet.wav in Resources */,
 			);
@@ -193,6 +199,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		808D0E9A2B7A8592008D057E /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				808D0E992B7A8592008D057E /* en */,
+				808D0E9B2B7A859C008D057E /* es */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 		80D5116B2B73A5E9005E923C /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -217,6 +232,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -280,6 +296,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";

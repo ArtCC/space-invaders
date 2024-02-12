@@ -49,7 +49,7 @@ class StartScene: SKScene {
         let label = SKLabelNode(fontNamed: Constants.Fonts.courier)
         label.fontSize = 50
         label.fontColor = .white
-        label.text = "Jugar"
+        label.text = NSLocalizedString("start.scene.play.text", comment: "")
         label.position = CGPoint(x: size.width / 2, y: size.height / 2 - 50)
 
         addChild(label)
@@ -58,7 +58,7 @@ class StartScene: SKScene {
     private func createScoreLabel() {
         let score = String(ScoreManager.getScore())
         let scoreLabel = SKLabelNode(fontNamed: Constants.Fonts.courier)
-        scoreLabel.text = String(format: "Puntuación: %@", score)
+        scoreLabel.text = String(format: NSLocalizedString("start.scene.score.text", comment: ""), score)
         scoreLabel.fontSize = 25
         scoreLabel.horizontalAlignmentMode = .right
         scoreLabel.verticalAlignmentMode = .top
