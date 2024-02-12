@@ -36,8 +36,8 @@ class StartScene: SKScene {
         addChild(sprite)
 
         let waitAction = SKAction.wait(forDuration: 0.5)
-        let moveAction = SKAction.move(to: CGPoint(x: size.width / 2, y: size.height - sprite.size.height / 2 - sprite.size.height),
-                                       duration: 0.5)
+        let moveTo = CGPoint(x: size.width / 2, y: size.height - sprite.size.height / 2 - sprite.size.height)
+        let moveAction = SKAction.move(to: moveTo, duration: 0.5)
 
         sprite.run(SKAction.sequence([waitAction, moveAction])) {
             self.createLabel()

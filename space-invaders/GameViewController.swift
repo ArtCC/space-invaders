@@ -22,35 +22,25 @@ class GameViewController: UIViewController {
         }
 
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(applicationWillResignActive),
+                                               selector: #selector(willResignActiveNotification),
                                                name: UIApplication.willResignActiveNotification,
                                                object: nil)
 
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(applicationDidBecomeActive),
+                                               selector: #selector(didBecomeActiveNotification),
                                                name: UIApplication.didBecomeActiveNotification,
                                                object: nil)
     }
 
-    // MARK: - Override
-
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        .portrait
-    }
-
-    override var prefersStatusBarHidden: Bool {
-        true
-    }
-
     // MARK: - Notifications
 
-    @objc func applicationWillResignActive() {
+    @objc func willResignActiveNotification() {
         if let view = self.view as! SKView? {
             view.isPaused = true
         }
     }
 
-    @objc func applicationDidBecomeActive() {
+    @objc func didBecomeActiveNotification() {
         if let view = self.view as! SKView? {
             view.isPaused = false
         }

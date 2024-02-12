@@ -13,8 +13,6 @@
 		801346A42B73B72A0049E476 /* InvaderHit.wav in Resources */ = {isa = PBXBuildFile; fileRef = 801346A02B73B72A0049E476 /* InvaderHit.wav */; };
 		801346A62B73C7020049E476 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801346A52B73C7020049E476 /* GameOverScene.swift */; };
 		801346A82B73CF340049E476 /* StartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801346A72B73CF340049E476 /* StartScene.swift */; };
-		806742452B73EDF400E91FA1 /* GameScene+Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806742442B73EDF400E91FA1 /* GameScene+Setup.swift */; };
-		806742472B73EE1E00E91FA1 /* GameScene+UITouch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806742462B73EE1E00E91FA1 /* GameScene+UITouch.swift */; };
 		80D511622B73A5E9005E923C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D511612B73A5E9005E923C /* AppDelegate.swift */; };
 		80D511682B73A5E9005E923C /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D511672B73A5E9005E923C /* GameScene.swift */; };
 		80D5116A2B73A5E9005E923C /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D511692B73A5E9005E923C /* GameViewController.swift */; };
@@ -30,8 +28,6 @@
 		801346A02B73B72A0049E476 /* InvaderHit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = InvaderHit.wav; sourceTree = "<group>"; };
 		801346A52B73C7020049E476 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		801346A72B73CF340049E476 /* StartScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartScene.swift; sourceTree = "<group>"; };
-		806742442B73EDF400E91FA1 /* GameScene+Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+Setup.swift"; sourceTree = "<group>"; };
-		806742462B73EE1E00E91FA1 /* GameScene+UITouch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+UITouch.swift"; sourceTree = "<group>"; };
 		80D5115E2B73A5E9005E923C /* space-invaders.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "space-invaders.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		80D511612B73A5E9005E923C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		80D511672B73A5E9005E923C /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -92,8 +88,6 @@
 			children = (
 				80D511612B73A5E9005E923C /* AppDelegate.swift */,
 				80D511672B73A5E9005E923C /* GameScene.swift */,
-				806742462B73EE1E00E91FA1 /* GameScene+UITouch.swift */,
-				806742442B73EDF400E91FA1 /* GameScene+Setup.swift */,
 				801346A52B73C7020049E476 /* GameOverScene.swift */,
 				80D511692B73A5E9005E923C /* GameViewController.swift */,
 				801346A72B73CF340049E476 /* StartScene.swift */,
@@ -180,12 +174,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				806742452B73EDF400E91FA1 /* GameScene+Setup.swift in Sources */,
 				80D511682B73A5E9005E923C /* GameScene.swift in Sources */,
 				80D5116A2B73A5E9005E923C /* GameViewController.swift in Sources */,
 				801346A62B73C7020049E476 /* GameOverScene.swift in Sources */,
 				801346A82B73CF340049E476 /* StartScene.swift in Sources */,
-				806742472B73EE1E00E91FA1 /* GameScene+UITouch.swift in Sources */,
 				80D511622B73A5E9005E923C /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
