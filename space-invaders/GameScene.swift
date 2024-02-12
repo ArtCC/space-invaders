@@ -31,13 +31,12 @@ enum InvaderMovementDirection {
     case left
     case downThenRight
     case downThenLeft
-    case none
 }
 
-enum InvaderType {
-    case a
-    case b
-    case c
+enum InvaderType: String {
+    case invaderA
+    case invaderB
+    case invaderC
 
     static var size: CGSize {
         CGSize(width: 24, height: 16)
@@ -58,13 +57,12 @@ enum Nodes: String {
     case shipFiredBullet
 }
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class GameScene: SKScene {
     // MARK: - Properties
 
     var invaderMovementDirection: InvaderMovementDirection = .right
     var timeOfLastMove: CFTimeInterval = 0
     var timePerMove: CFTimeInterval = 1
-    var contactQueue = [SKPhysicsContact]()
     var score: Int = 0
     var selectedNodes: [UITouch: SKSpriteNode] = [:]
     var joystickIsActive = false
@@ -78,8 +76,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Life's cycle
 
     override func didMove(to view: SKView) {
-        backgroundColor = .black
-
         setup()
     }
 
@@ -88,265 +84,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         if isGameOver() {
             routeToGameOverScene()
-        }
+        } else {
+            moveInvaders(forUpdate: currentTime)
+            fireInvaderBullets(forUpdate: currentTime)
 
-        moveInvaders(forUpdate: currentTime)
-        fireInvaderBullets(forUpdate: currentTime)
-        processContacts(forUpdate: currentTime)
-
-        if joystickIsActive == true {
-            ship.position = CGPointMake(ship.position.x - (playerVelocityX * 3), ship.position.y)
-        }
-    }
-
-    // MARK: - Public
-
-    func adjustScore(by points: Int) {
-        score += points
-
-        if let score = childNode(withName: Nodes.scoreHud.rawValue) as? SKLabelNode {
-            score.text = String(format: "Puntuación: %04u", self.score)
-        }
-    }
-
-    func makeBullet(ofType bulletType: BulletType) -> SKNode {
-        var bullet: SKNode
-
-        switch bulletType {
-        case .shipFired:
-            bullet = SKSpriteNode(color: .green, size: Constants.kBulletSize)
-            bullet.name = Nodes.shipFiredBullet.rawValue
-            bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
-            bullet.physicsBody!.isDynamic = true
-            bullet.physicsBody!.affectedByGravity = false
-            bullet.physicsBody!.categoryBitMask = Constants.kShipFiredBulletCategory
-            bullet.physicsBody!.contactTestBitMask = Constants.kInvaderCategory
-            bullet.physicsBody!.collisionBitMask = 0x0
-        case .invaderFired:
-            bullet = SKSpriteNode(color: .magenta, size: Constants.kBulletSize)
-            bullet.name = Nodes.invaderFiredBullet.rawValue
-            bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
-            bullet.physicsBody!.isDynamic = true
-            bullet.physicsBody!.affectedByGravity = false
-            bullet.physicsBody!.categoryBitMask = Constants.kInvaderFiredBulletCategory
-            bullet.physicsBody!.contactTestBitMask = Constants.kShipCategory
-            bullet.physicsBody!.collisionBitMask = 0x0
-        }
-
-        return bullet
-    }
-
-    func moveInvaders(forUpdate currentTime: CFTimeInterval) {
-        if currentTime - timeOfLastMove < timePerMove {
-            return
-        }
-
-        determineInvaderMovementDirection()
-
-        enumerateChildNodes(withName: InvaderType.name) { node, stop in
-            switch self.invaderMovementDirection {
-            case .right:
-                node.position = CGPoint(x: node.position.x + 10, y: node.position.y)
-            case .left:
-                node.position = CGPoint(x: node.position.x - 10, y: node.position.y)
-            case .downThenLeft, .downThenRight:
-                node.position = CGPoint(x: node.position.x, y: node.position.y - 10)
-            case .none:
-                break
-            }
-
-            self.timeOfLastMove = currentTime
-        }
-    }
-
-    func adjustInvaderMovement(to timePerMove: CFTimeInterval) {
-        if self.timePerMove <= 0 {
-            return
-        }
-
-        let ratio = CGFloat(self.timePerMove / timePerMove)
-
-        self.timePerMove = timePerMove
-
-        enumerateChildNodes(withName: InvaderType.name) { node, stop in
-            node.speed = node.speed * ratio
-        }
-    }
-
-    func fireInvaderBullets(forUpdate currentTime: CFTimeInterval) {
-        let existingBullet = childNode(withName: Nodes.invaderFiredBullet.rawValue)
-
-        if existingBullet == nil {
-            var allInvaders = [SKNode]()
-
-            enumerateChildNodes(withName: InvaderType.name) { node, stop in
-                allInvaders.append(node)
-            }
-
-            if allInvaders.count > 0 {
-                let allInvadersIndex = Int(arc4random_uniform(UInt32(allInvaders.count)))
-                let invader = allInvaders[allInvadersIndex]
-
-                let bullet = makeBullet(ofType: .invaderFired)
-                bullet.position = CGPoint(
-                    x: invader.position.x,
-                    y: invader.position.y - invader.frame.size.height / 2 + bullet.frame.size.height / 2
-                )
-
-                let bulletDestination = CGPoint(x: invader.position.x, y: -(bullet.frame.size.height / 2))
-
-                fireBullet(
-                    bullet: bullet,
-                    toDestination: bulletDestination,
-                    withDuration: 2.0,
-                    andSoundFileName: "InvaderBullet.wav"
-                )
+            if joystickIsActive == true {
+                ship.position = CGPointMake(ship.position.x - (playerVelocityX * 3), ship.position.y)
             }
         }
-    }
-
-    func processContacts(forUpdate currentTime: CFTimeInterval) {
-        contactQueue.forEach {
-            handle($0)
-
-            if let index = contactQueue.firstIndex(of: $0) {
-                contactQueue.remove(at: index)
-            }
-        }
-    }
-
-    func determineInvaderMovementDirection() {
-        var proposedMovementDirection: InvaderMovementDirection = invaderMovementDirection
-
-        enumerateChildNodes(withName: InvaderType.name) { node, stop in
-            switch self.invaderMovementDirection {
-            case .right:
-                if node.frame.maxX >= node.scene!.size.width - 1.0 {
-                    proposedMovementDirection = .downThenLeft
-
-                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
-
-                    stop.pointee = true
-                }
-            case .left:
-                if node.frame.minX <= 1.0 {
-                    proposedMovementDirection = .downThenRight
-
-                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
-
-                    stop.pointee = true
-                }
-            case .downThenLeft:
-                proposedMovementDirection = .left
-
-                stop.pointee = true
-            case .downThenRight:
-                proposedMovementDirection = .right
-
-                stop.pointee = true
-            default:
-                break
-            }
-        }
-
-        if proposedMovementDirection != invaderMovementDirection {
-            invaderMovementDirection = proposedMovementDirection
-        }
-    }
-
-    func fireBullet(bullet: SKNode,
-                    toDestination destination: CGPoint,
-                    withDuration duration: CFTimeInterval,
-                    andSoundFileName soundName: String) {
-        let bulletAction = SKAction.sequence([
-            SKAction.move(to: destination, duration: duration),
-            SKAction.wait(forDuration: 3.0 / 60.0),
-            SKAction.removeFromParent()
-        ])
-
-        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: true)
-
-        bullet.run(SKAction.group([bulletAction, soundAction]))
-
-        addChild(bullet)
-    }
-
-    func fireShipBullets() {
-        let existingBullet = childNode(withName: Nodes.shipFiredBullet.rawValue)
-
-        if existingBullet == nil {
-            if let ship = childNode(withName: Nodes.ship.rawValue) {
-                let bullet = makeBullet(ofType: .shipFired)
-                bullet.position = CGPoint(
-                    x: ship.position.x,
-                    y: ship.position.y + ship.frame.size.height - bullet.frame.size.height / 2
-                )
-
-                let bulletDestination = CGPoint(
-                    x: ship.position.x,
-                    y: frame.size.height + bullet.frame.size.height / 2
-                )
-
-                fireBullet(
-                    bullet: bullet,
-                    toDestination: bulletDestination,
-                    withDuration: 1.0,
-                    andSoundFileName: "ShipBullet.wav"
-                )
-            }
-        }
-    }
-
-    func didBegin(_ contact: SKPhysicsContact) {
-        contactQueue.append(contact)
-    }
-
-    func handle(_ contact: SKPhysicsContact) {
-        if contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil {
-            return
-        }
-
-        let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
-
-        if nodeNames.contains(Nodes.ship.rawValue) && nodeNames.contains(Nodes.invaderFiredBullet.rawValue) {
-            run(SKAction.playSoundFileNamed("ShipHit.wav", waitForCompletion: false))
-
-            contact.bodyA.node!.removeFromParent()
-            contact.bodyB.node!.removeFromParent()
-        } else if nodeNames.contains(InvaderType.name) && nodeNames.contains(Nodes.shipFiredBullet.rawValue) {
-            run(SKAction.playSoundFileNamed("InvaderHit.wav", waitForCompletion: false))
-
-            contact.bodyA.node!.removeFromParent()
-            contact.bodyB.node!.removeFromParent()
-
-            adjustScore(by: 100)
-        } else if nodeNames.contains(InvaderType.name) && nodeNames.contains(Nodes.ship.rawValue) {
-            run(SKAction.playSoundFileNamed("ShipHit.wav", waitForCompletion: false))
-
-            routeToGameOverScene()
-        }
-    }
-
-    func isGameOver() -> Bool {
-        var invaderTooLow = false
-
-        let invader = childNode(withName: InvaderType.name)
-        let ship = childNode(withName: Nodes.ship.rawValue)
-
-        enumerateChildNodes(withName: InvaderType.name) { node, stop in
-            if Float(node.frame.minY) <= Constants.kMinInvaderBottomHeight {
-                invaderTooLow = true
-                stop.pointee = true
-            }
-        }
-
-        return invader == nil || invaderTooLow || ship == nil
-    }
-
-    func routeToGameOverScene() {
-        let gameOverScene = GameOverScene(size: size)
-
-        view?.presentScene(gameOverScene, transition: .crossFade(withDuration: 0.5))
     }
 }
 
@@ -354,15 +99,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
 extension GameScene {
     func setup() {
-        physicsWorld.contactDelegate = self
-
-        physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
-        physicsBody!.categoryBitMask = Constants.kSceneEdgeCategory
+        backgroundColor = .black
 
         setupHud()
         setupInvaders()
         setupPlayerControls()
         setupShip()
+        setupPhysics()
     }
 
     func setupHud() {
@@ -386,11 +129,11 @@ extension GameScene {
             var invaderType: InvaderType
 
             if row % 3 == 0 {
-                invaderType = .a
+                invaderType = .invaderA
             } else if row % 3 == 1 {
-                invaderType = .b
+                invaderType = .invaderB
             } else {
-                invaderType = .c
+                invaderType = .invaderC
             }
 
             let invaderPositionY = CGFloat(row) * (InvaderType.size.height * 2) + baseOrigin.y
@@ -444,9 +187,15 @@ extension GameScene {
         addChild(firePad)
     }
 
+    func setupPhysics() {
+        physicsWorld.contactDelegate = self
+
+        physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+        physicsBody!.categoryBitMask = Constants.kSceneEdgeCategory
+    }
+
     func makeInvader(ofType invaderType: InvaderType) -> SKNode {
         let invaderTextures = loadInvaderTextures(ofType: invaderType)
-
         let invader = SKSpriteNode(texture: invaderTextures[0])
         invader.name = InvaderType.name
         invader.run(SKAction.repeatForever(SKAction.animate(with: invaderTextures, timePerFrame: timePerMove)))
@@ -462,13 +211,13 @@ extension GameScene {
     func loadInvaderTextures(ofType invaderType: InvaderType) -> [SKTexture] {
         var prefix: String
 
-        switch(invaderType) {
-        case .a:
-            prefix = "invaderA"
-        case .b:
-            prefix = "invaderB"
-        case .c:
-            prefix = "invaderC"
+        switch invaderType {
+        case .invaderA:
+            prefix = InvaderType.invaderA.rawValue
+        case .invaderB:
+            prefix = InvaderType.invaderB.rawValue
+        case .invaderC:
+            prefix = InvaderType.invaderC.rawValue
         }
 
         return [SKTexture(imageNamed: String(format: "%@_00", prefix)),
@@ -486,6 +235,33 @@ extension GameScene {
         ship.physicsBody!.collisionBitMask = Constants.kSceneEdgeCategory
 
         return ship
+    }
+
+    func makeBullet(ofType bulletType: BulletType) -> SKNode {
+        var bullet: SKNode
+
+        switch bulletType {
+        case .shipFired:
+            bullet = SKSpriteNode(color: .green, size: Constants.kBulletSize)
+            bullet.name = Nodes.shipFiredBullet.rawValue
+            bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
+            bullet.physicsBody!.isDynamic = true
+            bullet.physicsBody!.affectedByGravity = false
+            bullet.physicsBody!.categoryBitMask = Constants.kShipFiredBulletCategory
+            bullet.physicsBody!.contactTestBitMask = Constants.kInvaderCategory
+            bullet.physicsBody!.collisionBitMask = 0x0
+        case .invaderFired:
+            bullet = SKSpriteNode(color: .magenta, size: Constants.kBulletSize)
+            bullet.name = Nodes.invaderFiredBullet.rawValue
+            bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
+            bullet.physicsBody!.isDynamic = true
+            bullet.physicsBody!.affectedByGravity = false
+            bullet.physicsBody!.categoryBitMask = Constants.kInvaderFiredBulletCategory
+            bullet.physicsBody!.contactTestBitMask = Constants.kShipCategory
+            bullet.physicsBody!.collisionBitMask = 0x0
+        }
+
+        return bullet
     }
 }
 
@@ -554,5 +330,214 @@ extension GameScene {
                 selectedNodes[touch] = nil
             }
         }
+    }
+}
+
+// MARK: - Private
+
+extension GameScene: SKPhysicsContactDelegate {
+    func didBegin(_ contact: SKPhysicsContact) {
+        if contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil {
+            return
+        }
+
+        let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
+
+        if nodeNames.contains(Nodes.ship.rawValue) && nodeNames.contains(Nodes.invaderFiredBullet.rawValue) {
+            run(SKAction.playSoundFileNamed("ShipHit.wav", waitForCompletion: false))
+
+            contact.bodyA.node!.removeFromParent()
+            contact.bodyB.node!.removeFromParent()
+        } else if nodeNames.contains(InvaderType.name) && nodeNames.contains(Nodes.shipFiredBullet.rawValue) {
+            run(SKAction.playSoundFileNamed("InvaderHit.wav", waitForCompletion: false))
+
+            contact.bodyA.node!.removeFromParent()
+            contact.bodyB.node!.removeFromParent()
+
+            adjustScore(by: 100)
+        } else if nodeNames.contains(InvaderType.name) && nodeNames.contains(Nodes.ship.rawValue) {
+            run(SKAction.playSoundFileNamed("ShipHit.wav", waitForCompletion: false))
+
+            routeToGameOverScene()
+        }
+    }
+}
+
+// MARK: - Private
+
+extension GameScene {
+    func adjustScore(by points: Int) {
+        score += points
+
+        if let score = childNode(withName: Nodes.scoreHud.rawValue) as? SKLabelNode {
+            score.text = String(format: "Puntuación: %04u", self.score)
+        }
+    }
+
+    func moveInvaders(forUpdate currentTime: CFTimeInterval) {
+        if currentTime - timeOfLastMove < timePerMove {
+            return
+        }
+
+        determineInvaderMovementDirection()
+
+        enumerateChildNodes(withName: InvaderType.name) { node, stop in
+            switch self.invaderMovementDirection {
+            case .right:
+                node.position = CGPoint(x: node.position.x + 10, y: node.position.y)
+            case .left:
+                node.position = CGPoint(x: node.position.x - 10, y: node.position.y)
+            case .downThenLeft, .downThenRight:
+                node.position = CGPoint(x: node.position.x, y: node.position.y - 10)
+            }
+
+            self.timeOfLastMove = currentTime
+        }
+    }
+
+    func adjustInvaderMovement(to timePerMove: CFTimeInterval) {
+        if self.timePerMove <= 0 {
+            return
+        }
+
+        let ratio = CGFloat(self.timePerMove / timePerMove)
+
+        self.timePerMove = timePerMove
+
+        enumerateChildNodes(withName: InvaderType.name) { node, stop in
+            node.speed = node.speed * ratio
+        }
+    }
+
+    func fireInvaderBullets(forUpdate currentTime: CFTimeInterval) {
+        let existingBullet = childNode(withName: Nodes.invaderFiredBullet.rawValue)
+
+        if existingBullet == nil {
+            var allInvaders = [SKNode]()
+
+            enumerateChildNodes(withName: InvaderType.name) { node, stop in
+                allInvaders.append(node)
+            }
+
+            if allInvaders.count > 0 {
+                let allInvadersIndex = Int(arc4random_uniform(UInt32(allInvaders.count)))
+                let invader = allInvaders[allInvadersIndex]
+
+                let bullet = makeBullet(ofType: .invaderFired)
+                bullet.position = CGPoint(
+                    x: invader.position.x,
+                    y: invader.position.y - invader.frame.size.height / 2 + bullet.frame.size.height / 2
+                )
+
+                let bulletDestination = CGPoint(x: invader.position.x, y: -(bullet.frame.size.height / 2))
+
+                fireBullet(
+                    bullet: bullet,
+                    toDestination: bulletDestination,
+                    withDuration: 2.0,
+                    andSoundFileName: "InvaderBullet.wav"
+                )
+            }
+        }
+    }
+
+    func determineInvaderMovementDirection() {
+        var proposedMovementDirection: InvaderMovementDirection = invaderMovementDirection
+
+        enumerateChildNodes(withName: InvaderType.name) { node, stop in
+            switch self.invaderMovementDirection {
+            case .right:
+                if node.frame.maxX >= node.scene!.size.width - 1.0 {
+                    proposedMovementDirection = .downThenLeft
+
+                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
+
+                    stop.pointee = true
+                }
+            case .left:
+                if node.frame.minX <= 1.0 {
+                    proposedMovementDirection = .downThenRight
+
+                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
+
+                    stop.pointee = true
+                }
+            case .downThenLeft:
+                proposedMovementDirection = .left
+
+                stop.pointee = true
+            case .downThenRight:
+                proposedMovementDirection = .right
+
+                stop.pointee = true
+            }
+        }
+
+        if proposedMovementDirection != invaderMovementDirection {
+            invaderMovementDirection = proposedMovementDirection
+        }
+    }
+
+    func fireBullet(bullet: SKNode,
+                    toDestination destination: CGPoint,
+                    withDuration duration: CFTimeInterval,
+                    andSoundFileName soundName: String) {
+        let bulletAction = SKAction.sequence([
+            SKAction.move(to: destination, duration: duration),
+            SKAction.wait(forDuration: 3.0 / 60.0),
+            SKAction.removeFromParent()
+        ])
+
+        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: true)
+
+        bullet.run(SKAction.group([bulletAction, soundAction]))
+
+        addChild(bullet)
+    }
+
+    func fireShipBullets() {
+        let existingBullet = childNode(withName: Nodes.shipFiredBullet.rawValue)
+
+        if existingBullet == nil {
+            if let ship = childNode(withName: Nodes.ship.rawValue) {
+                let bullet = makeBullet(ofType: .shipFired)
+                bullet.position = CGPoint(
+                    x: ship.position.x,
+                    y: ship.position.y + ship.frame.size.height - bullet.frame.size.height / 2
+                )
+
+                let bulletDestination = CGPoint(
+                    x: ship.position.x,
+                    y: frame.size.height + bullet.frame.size.height / 2
+                )
+
+                fireBullet(
+                    bullet: bullet,
+                    toDestination: bulletDestination,
+                    withDuration: 1.0,
+                    andSoundFileName: "ShipBullet.wav"
+                )
+            }
+        }
+    }
+
+    func isGameOver() -> Bool {
+        var invaderTooLow = false
+
+        let invader = childNode(withName: InvaderType.name)
+        let ship = childNode(withName: Nodes.ship.rawValue)
+
+        enumerateChildNodes(withName: InvaderType.name) { node, stop in
+            if Float(node.frame.minY) <= Constants.kMinInvaderBottomHeight {
+                invaderTooLow = true
+                stop.pointee = true
+            }
+        }
+
+        return invader == nil || invaderTooLow || ship == nil
+    }
+
+    func routeToGameOverScene() {
+        view?.presentScene(GameOverScene(size: size), transition: .crossFade(withDuration: 0.5))
     }
 }

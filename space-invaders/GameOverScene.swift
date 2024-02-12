@@ -36,10 +36,8 @@ class GameOverScene: SKScene {
                 guard let self else {
                     return
                 }
-                let startScene = StartScene(size: size)
-                startScene.scaleMode = .aspectFill
 
-                view?.presentScene(startScene, transition: .crossFade(withDuration: 0.5))
+                self.view?.presentScene(StartScene(size: size), transition: .crossFade(withDuration: 0.5))
             }
         ]))
     }
