@@ -12,20 +12,6 @@ enum BulletType {
     case invaderFired
 }
 
-enum Constants {
-    static let kMinInvaderBottomHeight: Float = 32
-    static let kInvaderGridSpacing = CGSize(width: 12, height: 12)
-    static let kInvaderRowCount = 5
-    static let kInvaderColCount = 10
-    static let kShipSize = CGSize(width: 30, height: 16)
-    static let kBulletSize = CGSize(width: 4, height: 8)
-    static let kInvaderCategory: UInt32 = 0x1 << 0
-    static let kShipFiredBulletCategory: UInt32 = 0x1 << 1
-    static let kShipCategory: UInt32 = 0x1 << 2
-    static let kSceneEdgeCategory: UInt32 = 0x1 << 3
-    static let kInvaderFiredBulletCategory: UInt32 = 0x1 << 4
-}
-
 enum InvaderMovementDirection {
     case right
     case left
@@ -76,40 +62,43 @@ class GameScene: SKScene {
     // MARK: - Life's cycle
 
     override func didMove(to view: SKView) {
-        setup()
+        setupComponents()
     }
 
     // MARK: - Update
 
     override func update(_ currentTime: TimeInterval) {
-        if isGameOver() {
-            routeToGameOverScene()
+        let isGameOver = isGameOver()
+
+        if isGameOver.endGame {
+            routeToGameOverScene(isGameOver.isWin)
         } else {
             moveInvaders(forUpdate: currentTime)
             fireInvaderBullets(forUpdate: currentTime)
 
-            if joystickIsActive == true {
+            if joystickIsActive {
                 ship.position = CGPointMake(ship.position.x - (playerVelocityX * 3), ship.position.y)
             }
         }
     }
 }
 
-// MARK: - Setup
+// MARK: - Private
+// MARK: - Setup and create
 
-extension GameScene {
-    func setup() {
+private extension GameScene {
+    func setupComponents() {
         backgroundColor = .black
 
-        setupHud()
-        setupInvaders()
-        setupPlayerControls()
-        setupShip()
-        setupPhysics()
+        createScoreboard()
+        createInvaders()
+        createPlayerControls()
+        createShip()
+        addPhysics()
     }
 
-    func setupHud() {
-        let scoreLabel = SKLabelNode(fontNamed: "Courier")
+    func createScoreboard() {
+        let scoreLabel = SKLabelNode(fontNamed: Constants.Fonts.courier)
         scoreLabel.name = Nodes.scoreHud.rawValue
         scoreLabel.fontSize = 25
         scoreLabel.fontColor = .red
@@ -122,7 +111,7 @@ extension GameScene {
         addChild(scoreLabel)
     }
 
-    func setupInvaders() {
+    func createInvaders() {
         let baseOrigin = CGPoint(x: size.width / 3, y: size.height / 1.35)
 
         for row in 0..<Constants.kInvaderRowCount {
@@ -152,46 +141,6 @@ extension GameScene {
                 )
             }
         }
-    }
-
-    func setupShip() {
-        let ship = makeShip()
-        ship.position = CGPoint(x: size.width / 2.0,
-                                y: Constants.kShipSize.height / 2.0 + joystickBase.position.y + joystick.frame.height)
-
-        addChild(ship)
-    }
-
-    func setupPlayerControls() {
-        joystickBase.name = Nodes.joystickBase.rawValue
-        joystickBase.position = CGPoint(x: 80, y: 80)
-        joystickBase.zPosition = 5.0
-        joystickBase.alpha = 0.2
-        joystickBase.setScale(0.3)
-
-        joystick.name = Nodes.joystick.rawValue
-        joystick.position = joystickBase.position
-        joystick.zPosition = 6.0
-        joystick.alpha = 0.5
-        joystick.setScale(0.20)
-
-        firePad.name = Nodes.firePad.rawValue
-        firePad.anchorPoint = CGPoint(x: 1.0, y: 0.0)
-        firePad.position = CGPoint(x: frame.size.width - 50, y: joystick.position.y - joystick.frame.size.height / 2)
-        firePad.zPosition = 6.0
-        firePad.alpha = 0.5
-        firePad.setScale(0.20)
-
-        addChild(joystickBase)
-        addChild(joystick)
-        addChild(firePad)
-    }
-
-    func setupPhysics() {
-        physicsWorld.contactDelegate = self
-
-        physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
-        physicsBody!.categoryBitMask = Constants.kSceneEdgeCategory
     }
 
     func makeInvader(ofType invaderType: InvaderType) -> SKNode {
@@ -224,6 +173,14 @@ extension GameScene {
                 SKTexture(imageNamed: String(format: "%@_01", prefix))]
     }
 
+    func createShip() {
+        let ship = makeShip()
+        ship.position = CGPoint(x: size.width / 2.0,
+                                y: Constants.kShipSize.height / 2.0 + joystickBase.position.y + joystick.frame.height)
+
+        addChild(ship)
+    }
+
     func makeShip() -> SKNode {
         ship.name = Nodes.ship.rawValue
         ship.physicsBody = SKPhysicsBody(rectangleOf: ship.frame.size)
@@ -237,31 +194,36 @@ extension GameScene {
         return ship
     }
 
-    func makeBullet(ofType bulletType: BulletType) -> SKNode {
-        var bullet: SKNode
+    func createPlayerControls() {
+        joystickBase.name = Nodes.joystickBase.rawValue
+        joystickBase.position = CGPoint(x: 80, y: 80)
+        joystickBase.zPosition = 5.0
+        joystickBase.alpha = 0.2
+        joystickBase.setScale(0.3)
 
-        switch bulletType {
-        case .shipFired:
-            bullet = SKSpriteNode(color: .green, size: Constants.kBulletSize)
-            bullet.name = Nodes.shipFiredBullet.rawValue
-            bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
-            bullet.physicsBody!.isDynamic = true
-            bullet.physicsBody!.affectedByGravity = false
-            bullet.physicsBody!.categoryBitMask = Constants.kShipFiredBulletCategory
-            bullet.physicsBody!.contactTestBitMask = Constants.kInvaderCategory
-            bullet.physicsBody!.collisionBitMask = 0x0
-        case .invaderFired:
-            bullet = SKSpriteNode(color: .magenta, size: Constants.kBulletSize)
-            bullet.name = Nodes.invaderFiredBullet.rawValue
-            bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
-            bullet.physicsBody!.isDynamic = true
-            bullet.physicsBody!.affectedByGravity = false
-            bullet.physicsBody!.categoryBitMask = Constants.kInvaderFiredBulletCategory
-            bullet.physicsBody!.contactTestBitMask = Constants.kShipCategory
-            bullet.physicsBody!.collisionBitMask = 0x0
-        }
+        joystick.name = Nodes.joystick.rawValue
+        joystick.position = joystickBase.position
+        joystick.zPosition = 6.0
+        joystick.alpha = 0.5
+        joystick.setScale(0.20)
 
-        return bullet
+        firePad.name = Nodes.firePad.rawValue
+        firePad.anchorPoint = CGPoint(x: 1.0, y: 0.0)
+        firePad.position = CGPoint(x: frame.size.width - 50, y: joystick.position.y - joystick.frame.size.height / 2)
+        firePad.zPosition = 6.0
+        firePad.alpha = 0.5
+        firePad.setScale(0.20)
+
+        addChild(joystickBase)
+        addChild(joystick)
+        addChild(firePad)
+    }
+
+    func addPhysics() {
+        physicsWorld.contactDelegate = self
+
+        physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+        physicsBody!.categoryBitMask = Constants.kSceneEdgeCategory
     }
 }
 
@@ -293,22 +255,20 @@ extension GameScene {
         for touch in touches {
             let touchLocation = touch.location(in: self)
 
-            if let node = selectedNodes[touch], node.name == Nodes.joystick.rawValue {
-                if joystickIsActive {
-                    let vector = CGVector(dx: touchLocation.x - joystickBase.position.x,
-                                          dy: touchLocation.y - joystickBase.position.y)
-                    let angle = atan2(vector.dy, vector.dx)
-                    let radio: CGFloat = joystickBase.frame.size.height / 2
+            if let node = selectedNodes[touch], node.name == Nodes.joystick.rawValue, joystickIsActive {
+                let vector = CGVector(dx: touchLocation.x - joystickBase.position.x,
+                                      dy: touchLocation.y - joystickBase.position.y)
+                let angle = atan2(vector.dy, vector.dx)
+                let radio: CGFloat = joystickBase.frame.size.height / 2
 
-                    let distance = min(sqrt(vector.dx * vector.dx + vector.dy * vector.dy), radio)
-                    let xDist: CGFloat = distance * cos(angle)
+                let distance = min(sqrt(vector.dx * vector.dx + vector.dy * vector.dy), radio)
+                let xDist: CGFloat = distance * cos(angle)
 
-                    joystick.position = CGPoint(x: joystickBase.position.x + xDist, y: joystickBase.position.y)
+                joystick.position = CGPoint(x: joystickBase.position.x + xDist, y: joystickBase.position.y)
 
-                    let xDistPlayer: CGFloat = sin(angle - 1.57079633) * radio
+                let xDistPlayer: CGFloat = sin(angle - 1.57079633) * radio
 
-                    playerVelocityX = xDistPlayer / radio
-                }
+                playerVelocityX = xDistPlayer / radio
             }
         }
     }
@@ -316,7 +276,7 @@ extension GameScene {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
             if selectedNodes[touch] != nil {
-                if joystickIsActive == true {
+                if joystickIsActive {
                     let defaultPosition: SKAction = SKAction.move(to: joystickBase.position, duration: 0.05)
                     defaultPosition.timingMode = SKActionTimingMode.easeOut
 
@@ -333,7 +293,7 @@ extension GameScene {
     }
 }
 
-// MARK: - Private
+// MARK: - SKPhysicsContactDelegate
 
 extension GameScene: SKPhysicsContactDelegate {
     func didBegin(_ contact: SKPhysicsContact) {
@@ -344,29 +304,29 @@ extension GameScene: SKPhysicsContactDelegate {
         let nodeNames = [contact.bodyA.node!.name!, contact.bodyB.node!.name!]
 
         if nodeNames.contains(Nodes.ship.rawValue) && nodeNames.contains(Nodes.invaderFiredBullet.rawValue) {
-            run(SKAction.playSoundFileNamed("ShipHit.wav", waitForCompletion: false))
+            run(SKAction.playSoundFileNamed(Constants.Sounds.ship, waitForCompletion: false))
 
             contact.bodyA.node!.removeFromParent()
             contact.bodyB.node!.removeFromParent()
         } else if nodeNames.contains(InvaderType.name) && nodeNames.contains(Nodes.shipFiredBullet.rawValue) {
-            run(SKAction.playSoundFileNamed("InvaderHit.wav", waitForCompletion: false))
+            run(SKAction.playSoundFileNamed(Constants.Sounds.invader, waitForCompletion: false))
 
             contact.bodyA.node!.removeFromParent()
             contact.bodyB.node!.removeFromParent()
 
-            adjustScore(by: 100)
+            addPointsToScoreboard(by: 100)
         } else if nodeNames.contains(InvaderType.name) && nodeNames.contains(Nodes.ship.rawValue) {
-            run(SKAction.playSoundFileNamed("ShipHit.wav", waitForCompletion: false))
+            run(SKAction.playSoundFileNamed(Constants.Sounds.ship, waitForCompletion: false))
 
-            routeToGameOverScene()
+            routeToGameOverScene(false)
         }
     }
 }
 
 // MARK: - Private
 
-extension GameScene {
-    func adjustScore(by points: Int) {
+private extension GameScene {
+    func addPointsToScoreboard(by points: Int) {
         score += points
 
         if let score = childNode(withName: Nodes.scoreHud.rawValue) as? SKLabelNode {
@@ -392,6 +352,43 @@ extension GameScene {
             }
 
             self.timeOfLastMove = currentTime
+        }
+    }
+
+    func determineInvaderMovementDirection() {
+        var proposedMovementDirection: InvaderMovementDirection = invaderMovementDirection
+
+        enumerateChildNodes(withName: InvaderType.name) { node, stop in
+            switch self.invaderMovementDirection {
+            case .right:
+                if node.frame.maxX >= node.scene!.size.width - 1.0 {
+                    proposedMovementDirection = .downThenLeft
+
+                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
+
+                    stop.pointee = true
+                }
+            case .left:
+                if node.frame.minX <= 1.0 {
+                    proposedMovementDirection = .downThenRight
+
+                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
+
+                    stop.pointee = true
+                }
+            case .downThenLeft:
+                proposedMovementDirection = .left
+
+                stop.pointee = true
+            case .downThenRight:
+                proposedMovementDirection = .right
+
+                stop.pointee = true
+            }
+        }
+
+        if proposedMovementDirection != invaderMovementDirection {
+            invaderMovementDirection = proposedMovementDirection
         }
     }
 
@@ -435,46 +432,9 @@ extension GameScene {
                     bullet: bullet,
                     toDestination: bulletDestination,
                     withDuration: 2.0,
-                    andSoundFileName: "InvaderBullet.wav"
+                    andSoundFileName: Constants.Sounds.invaderBullet
                 )
             }
-        }
-    }
-
-    func determineInvaderMovementDirection() {
-        var proposedMovementDirection: InvaderMovementDirection = invaderMovementDirection
-
-        enumerateChildNodes(withName: InvaderType.name) { node, stop in
-            switch self.invaderMovementDirection {
-            case .right:
-                if node.frame.maxX >= node.scene!.size.width - 1.0 {
-                    proposedMovementDirection = .downThenLeft
-
-                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
-
-                    stop.pointee = true
-                }
-            case .left:
-                if node.frame.minX <= 1.0 {
-                    proposedMovementDirection = .downThenRight
-
-                    self.adjustInvaderMovement(to: self.timePerMove * 0.8)
-
-                    stop.pointee = true
-                }
-            case .downThenLeft:
-                proposedMovementDirection = .left
-
-                stop.pointee = true
-            case .downThenRight:
-                proposedMovementDirection = .right
-
-                stop.pointee = true
-            }
-        }
-
-        if proposedMovementDirection != invaderMovementDirection {
-            invaderMovementDirection = proposedMovementDirection
         }
     }
 
@@ -515,13 +475,40 @@ extension GameScene {
                     bullet: bullet,
                     toDestination: bulletDestination,
                     withDuration: 1.0,
-                    andSoundFileName: "ShipBullet.wav"
+                    andSoundFileName: Constants.Sounds.shipBullet
                 )
             }
         }
     }
 
-    func isGameOver() -> Bool {
+    func makeBullet(ofType bulletType: BulletType) -> SKNode {
+        var bullet: SKNode
+
+        switch bulletType {
+        case .shipFired:
+            bullet = SKSpriteNode(color: .green, size: Constants.kBulletSize)
+            bullet.name = Nodes.shipFiredBullet.rawValue
+            bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
+            bullet.physicsBody!.isDynamic = true
+            bullet.physicsBody!.affectedByGravity = false
+            bullet.physicsBody!.categoryBitMask = Constants.kShipFiredBulletCategory
+            bullet.physicsBody!.contactTestBitMask = Constants.kInvaderCategory
+            bullet.physicsBody!.collisionBitMask = 0x0
+        case .invaderFired:
+            bullet = SKSpriteNode(color: .magenta, size: Constants.kBulletSize)
+            bullet.name = Nodes.invaderFiredBullet.rawValue
+            bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
+            bullet.physicsBody!.isDynamic = true
+            bullet.physicsBody!.affectedByGravity = false
+            bullet.physicsBody!.categoryBitMask = Constants.kInvaderFiredBulletCategory
+            bullet.physicsBody!.contactTestBitMask = Constants.kShipCategory
+            bullet.physicsBody!.collisionBitMask = 0x0
+        }
+
+        return bullet
+    }
+
+    func isGameOver() -> (endGame: Bool, isWin: Bool) {
         var invaderTooLow = false
 
         let invader = childNode(withName: InvaderType.name)
@@ -534,10 +521,13 @@ extension GameScene {
             }
         }
 
-        return invader == nil || invaderTooLow || ship == nil
+        let endGame = invader == nil || invaderTooLow || ship == nil
+        let isWin = invader == nil
+
+        return (endGame, isWin)
     }
 
-    func routeToGameOverScene() {
-        view?.presentScene(GameOverScene(size: size), transition: .crossFade(withDuration: 0.5))
+    func routeToGameOverScene(_ isWin: Bool) {
+        view?.presentScene(GameOverScene(size: size, isWin: isWin), transition: .crossFade(withDuration: 0.5))
     }
 }

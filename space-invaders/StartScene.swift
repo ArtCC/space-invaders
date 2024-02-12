@@ -29,7 +29,7 @@ class StartScene: SKScene {
     // MARK: - Private
 
     private func createHeader() {
-        let sprite = SKSpriteNode(imageNamed: "logo")
+        let sprite = SKSpriteNode(imageNamed: Constants.Images.logo)
         sprite.size = CGSize(width: 360, height: 200)
         sprite.position = CGPoint(x: size.width / 2, y: size.height / 2)
 
@@ -45,7 +45,7 @@ class StartScene: SKScene {
     }
 
     private func createLabel() {
-        let gameOverLabel = SKLabelNode(fontNamed: "Arial")
+        let gameOverLabel = SKLabelNode(fontNamed: Constants.Fonts.courier)
         gameOverLabel.fontSize = 50
         gameOverLabel.fontColor = .white
         gameOverLabel.text = "Jugar"

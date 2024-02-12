@@ -8,6 +8,20 @@
 import SpriteKit
 
 class GameOverScene: SKScene {
+    private var isWin = false
+
+    // MARK: - Init
+
+    init(size: CGSize, isWin: Bool) {
+        super.init(size: size)
+
+        self.isWin = isWin
+    }
+
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     // MARK: - Life's cycle
 
     override func didMove(to view: SKView) {
@@ -20,10 +34,10 @@ class GameOverScene: SKScene {
     // MARK: - Private
 
     private func createLabel() {
-        let gameOverLabel = SKLabelNode(fontNamed: "Arial")
+        let gameOverLabel = SKLabelNode(fontNamed: Constants.Fonts.courier)
         gameOverLabel.fontSize = 50
         gameOverLabel.fontColor = .white
-        gameOverLabel.text = "¡Has perdido!"
+        gameOverLabel.text = isWin ? "¡Has ganado!" : "¡Has perdido!"
         gameOverLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)
 
         addChild(gameOverLabel)
