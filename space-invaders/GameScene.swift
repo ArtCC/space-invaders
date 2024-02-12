@@ -29,7 +29,7 @@ enum InvaderType: String {
     }
 
     static var name: String {
-        "invader"
+        Constants.General.invaderName
     }
 }
 
@@ -54,10 +54,10 @@ class GameScene: SKScene {
     var joystickIsActive = false
     var playerVelocityX: CGFloat = 0
 
-    let joystickBase = SKSpriteNode(imageNamed: "img_base_joystick")
-    let joystick = SKSpriteNode(imageNamed: "img_joystick")
-    let firePad = SKSpriteNode(imageNamed: "img_joystick")
-    let ship = SKSpriteNode(imageNamed: "ship")
+    let joystickBase = SKSpriteNode(imageNamed: Constants.Images.joystickBase)
+    let joystick = SKSpriteNode(imageNamed: Constants.Images.joystick)
+    let firePad = SKSpriteNode(imageNamed: Constants.Images.firePad)
+    let ship = SKSpriteNode(imageNamed: Constants.Images.ship)
 
     // MARK: - Life's cycle
 
@@ -114,7 +114,7 @@ private extension GameScene {
     func createInvaders() {
         let baseOrigin = CGPoint(x: size.width / 3, y: size.height / 1.35)
 
-        for row in 0..<Constants.kInvaderRowCount {
+        for row in 0..<Constants.General.invaderRowCount {
             var invaderType: InvaderType
 
             if row % 3 == 0 {
@@ -129,14 +129,14 @@ private extension GameScene {
 
             var invaderPosition = CGPoint(x: baseOrigin.x, y: invaderPositionY)
 
-            for _ in 1..<Constants.kInvaderColCount {
+            for _ in 1..<Constants.General.invaderColCount {
                 let invader = makeInvader(ofType: invaderType)
                 invader.position = invaderPosition
 
                 addChild(invader)
 
                 invaderPosition = CGPoint(
-                    x: invaderPosition.x + InvaderType.size.width + Constants.kInvaderGridSpacing.width,
+                    x: invaderPosition.x + InvaderType.size.width + Constants.General.invaderGridSpacing.width,
                     y: invaderPositionY
                 )
             }
@@ -150,7 +150,7 @@ private extension GameScene {
         invader.run(SKAction.repeatForever(SKAction.animate(with: invaderTextures, timePerFrame: timePerMove)))
         invader.physicsBody = SKPhysicsBody(rectangleOf: invader.frame.size)
         invader.physicsBody!.isDynamic = false
-        invader.physicsBody!.categoryBitMask = Constants.kInvaderCategory
+        invader.physicsBody!.categoryBitMask = Constants.Physics.invaderCategory
         invader.physicsBody!.contactTestBitMask = 0x0
         invader.physicsBody!.collisionBitMask = 0x0
 
@@ -176,7 +176,7 @@ private extension GameScene {
     func createShip() {
         let ship = makeShip()
         ship.position = CGPoint(x: size.width / 2.0,
-                                y: Constants.kShipSize.height / 2.0 + joystickBase.position.y + joystick.frame.height)
+                                y: Constants.General.shipSize.height / 2.0 + joystickBase.position.y + joystick.frame.height)
 
         addChild(ship)
     }
@@ -187,9 +187,9 @@ private extension GameScene {
         ship.physicsBody!.isDynamic = true
         ship.physicsBody!.affectedByGravity = false
         ship.physicsBody!.mass = 0.02
-        ship.physicsBody!.categoryBitMask = Constants.kShipCategory
+        ship.physicsBody!.categoryBitMask = Constants.Physics.shipCategory
         ship.physicsBody!.contactTestBitMask = 0x0
-        ship.physicsBody!.collisionBitMask = Constants.kSceneEdgeCategory
+        ship.physicsBody!.collisionBitMask = Constants.Physics.sceneEdgeCategory
 
         return ship
     }
@@ -223,7 +223,7 @@ private extension GameScene {
         physicsWorld.contactDelegate = self
 
         physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
-        physicsBody!.categoryBitMask = Constants.kSceneEdgeCategory
+        physicsBody!.categoryBitMask = Constants.Physics.sceneEdgeCategory
     }
 }
 
@@ -332,6 +332,8 @@ private extension GameScene {
         if let score = childNode(withName: Nodes.scoreHud.rawValue) as? SKLabelNode {
             score.text = String(format: "Puntuación: %04u", self.score)
         }
+
+        ScoreManager.saveScore(score)
     }
 
     func moveInvaders(forUpdate currentTime: CFTimeInterval) {
@@ -486,22 +488,22 @@ private extension GameScene {
 
         switch bulletType {
         case .shipFired:
-            bullet = SKSpriteNode(color: .green, size: Constants.kBulletSize)
+            bullet = SKSpriteNode(color: .green, size: Constants.General.bulletSize)
             bullet.name = Nodes.shipFiredBullet.rawValue
             bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
             bullet.physicsBody!.isDynamic = true
             bullet.physicsBody!.affectedByGravity = false
-            bullet.physicsBody!.categoryBitMask = Constants.kShipFiredBulletCategory
-            bullet.physicsBody!.contactTestBitMask = Constants.kInvaderCategory
+            bullet.physicsBody!.categoryBitMask = Constants.Physics.shipFiredBulletCategory
+            bullet.physicsBody!.contactTestBitMask = Constants.Physics.invaderCategory
             bullet.physicsBody!.collisionBitMask = 0x0
         case .invaderFired:
-            bullet = SKSpriteNode(color: .magenta, size: Constants.kBulletSize)
+            bullet = SKSpriteNode(color: .magenta, size: Constants.General.bulletSize)
             bullet.name = Nodes.invaderFiredBullet.rawValue
             bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.frame.size)
             bullet.physicsBody!.isDynamic = true
             bullet.physicsBody!.affectedByGravity = false
-            bullet.physicsBody!.categoryBitMask = Constants.kInvaderFiredBulletCategory
-            bullet.physicsBody!.contactTestBitMask = Constants.kShipCategory
+            bullet.physicsBody!.categoryBitMask = Constants.Physics.invaderFiredBulletCategory
+            bullet.physicsBody!.contactTestBitMask = Constants.Physics.shipCategory
             bullet.physicsBody!.collisionBitMask = 0x0
         }
 
@@ -515,7 +517,7 @@ private extension GameScene {
         let ship = childNode(withName: Nodes.ship.rawValue)
 
         enumerateChildNodes(withName: InvaderType.name) { node, stop in
-            if Float(node.frame.minY) <= Constants.kMinInvaderBottomHeight {
+            if Float(node.frame.minY) <= Constants.General.minInvaderBottomHeight {
                 invaderTooLow = true
                 stop.pointee = true
             }

@@ -13,6 +13,7 @@ class StartScene: SKScene {
 
     override func didMove(to view: SKView) {
         createHeader()
+        createScoreLabel()
 
         backgroundColor = .black
     }
@@ -40,17 +41,29 @@ class StartScene: SKScene {
         let moveAction = SKAction.move(to: moveTo, duration: 0.5)
 
         sprite.run(SKAction.sequence([waitAction, moveAction])) {
-            self.createLabel()
+            self.createStartLabel()
         }
     }
 
-    private func createLabel() {
-        let gameOverLabel = SKLabelNode(fontNamed: Constants.Fonts.courier)
-        gameOverLabel.fontSize = 50
-        gameOverLabel.fontColor = .white
-        gameOverLabel.text = "Jugar"
-        gameOverLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 - 50)
+    private func createStartLabel() {
+        let label = SKLabelNode(fontNamed: Constants.Fonts.courier)
+        label.fontSize = 50
+        label.fontColor = .white
+        label.text = "Jugar"
+        label.position = CGPoint(x: size.width / 2, y: size.height / 2 - 50)
 
-        addChild(gameOverLabel)
+        addChild(label)
+    }
+
+    private func createScoreLabel() {
+        let score = String(ScoreManager.getScore())
+        let scoreLabel = SKLabelNode(fontNamed: Constants.Fonts.courier)
+        scoreLabel.text = String(format: "Puntuación: %@", score)
+        scoreLabel.fontSize = 25
+        scoreLabel.horizontalAlignmentMode = .right
+        scoreLabel.verticalAlignmentMode = .top
+        scoreLabel.position = CGPoint(x: size.width - 35, y: size.height - (60 + scoreLabel.frame.size.height))
+
+        addChild(scoreLabel)
     }
 }
