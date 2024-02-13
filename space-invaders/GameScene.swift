@@ -90,11 +90,15 @@ private extension GameScene {
     func setupComponents() {
         backgroundColor = .black
 
+        physicsWorld.contactDelegate = self
+
+        physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+        physicsBody!.categoryBitMask = Constants.Physics.sceneEdgeCategory
+
         createScoreboard()
         createInvaders()
         createPlayerControls()
         createShip()
-        addPhysics()
     }
 
     func createScoreboard() {
@@ -144,7 +148,7 @@ private extension GameScene {
     }
 
     func makeInvader(ofType invaderType: InvaderType) -> SKNode {
-        let invaderTextures = loadInvaderTextures(ofType: invaderType)
+        let invaderTextures = getInvaderTextures(invaderType)
         let invader = SKSpriteNode(texture: invaderTextures[0])
         invader.name = InvaderType.name
         invader.run(SKAction.repeatForever(SKAction.animate(with: invaderTextures, timePerFrame: timePerMove)))
@@ -157,10 +161,10 @@ private extension GameScene {
         return invader
     }
 
-    func loadInvaderTextures(ofType invaderType: InvaderType) -> [SKTexture] {
+    func getInvaderTextures(_ type: InvaderType) -> [SKTexture] {
         var prefix: String
 
-        switch invaderType {
+        switch type {
         case .invaderA:
             prefix = InvaderType.invaderA.rawValue
         case .invaderB:
@@ -174,14 +178,6 @@ private extension GameScene {
     }
 
     func createShip() {
-        let ship = makeShip()
-        ship.position = CGPoint(x: size.width / 2.0,
-                                y: Constants.General.shipSize.height / 2.0 + joystickBase.position.y + joystick.frame.height)
-
-        addChild(ship)
-    }
-
-    func makeShip() -> SKNode {
         ship.name = Nodes.ship.rawValue
         ship.physicsBody = SKPhysicsBody(rectangleOf: ship.frame.size)
         ship.physicsBody!.isDynamic = true
@@ -190,8 +186,10 @@ private extension GameScene {
         ship.physicsBody!.categoryBitMask = Constants.Physics.shipCategory
         ship.physicsBody!.contactTestBitMask = 0x0
         ship.physicsBody!.collisionBitMask = Constants.Physics.sceneEdgeCategory
+        ship.position = CGPoint(x: size.width / 2.0,
+                                y: Constants.General.shipSize.height / 2.0 + joystickBase.position.y + joystick.frame.height)
 
-        return ship
+        addChild(ship)
     }
 
     func createPlayerControls() {
@@ -217,13 +215,6 @@ private extension GameScene {
         addChild(joystickBase)
         addChild(joystick)
         addChild(firePad)
-    }
-
-    func addPhysics() {
-        physicsWorld.contactDelegate = self
-
-        physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
-        physicsBody!.categoryBitMask = Constants.Physics.sceneEdgeCategory
     }
 }
 
@@ -440,23 +431,6 @@ private extension GameScene {
         }
     }
 
-    func fireBullet(bullet: SKNode,
-                    toDestination destination: CGPoint,
-                    withDuration duration: CFTimeInterval,
-                    andSoundFileName soundName: String) {
-        let bulletAction = SKAction.sequence([
-            SKAction.move(to: destination, duration: duration),
-            SKAction.wait(forDuration: 3.0 / 60.0),
-            SKAction.removeFromParent()
-        ])
-
-        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: true)
-
-        bullet.run(SKAction.group([bulletAction, soundAction]))
-
-        addChild(bullet)
-    }
-
     func fireShipBullets() {
         let existingBullet = childNode(withName: Nodes.shipFiredBullet.rawValue)
 
@@ -508,6 +482,23 @@ private extension GameScene {
         }
 
         return bullet
+    }
+
+    func fireBullet(bullet: SKNode,
+                    toDestination destination: CGPoint,
+                    withDuration duration: CFTimeInterval,
+                    andSoundFileName soundName: String) {
+        let bulletAction = SKAction.sequence([
+            SKAction.move(to: destination, duration: duration),
+            SKAction.wait(forDuration: 3.0 / 60.0),
+            SKAction.removeFromParent()
+        ])
+        
+        let soundAction = SKAction.playSoundFileNamed(soundName, waitForCompletion: true)
+
+        bullet.run(SKAction.group([bulletAction, soundAction]))
+
+        addChild(bullet)
     }
 
     func isGameOver() -> (endGame: Bool, isWin: Bool) {
