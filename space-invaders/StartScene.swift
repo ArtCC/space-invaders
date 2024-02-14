@@ -12,10 +12,10 @@ class StartScene: SKScene {
     // MARK: - Life's cycle
 
     override func didMove(to view: SKView) {
-        createHeader()
-        createScoreLabel()
-
         backgroundColor = .black
+
+        createHeader()
+        createScoreboard()
     }
 
     // MARK: - UITouch
@@ -55,14 +55,15 @@ class StartScene: SKScene {
         addChild(label)
     }
 
-    private func createScoreLabel() {
+    private func createScoreboard() {
         let score = String(ScoreManager.getScore())
         let scoreLabel = SKLabelNode(fontNamed: Constants.Fonts.courier)
         scoreLabel.text = String(format: NSLocalizedString("start.scene.score.text", comment: ""), score)
         scoreLabel.fontSize = 25
-        scoreLabel.horizontalAlignmentMode = .right
-        scoreLabel.verticalAlignmentMode = .top
-        scoreLabel.position = CGPoint(x: size.width - 35, y: size.height - (60 + scoreLabel.frame.size.height))
+        scoreLabel.fontColor = .white
+        scoreLabel.horizontalAlignmentMode = .center
+        scoreLabel.verticalAlignmentMode = .center
+        scoreLabel.position = CGPoint(x: size.width / 2, y: size.height - (60 + scoreLabel.frame.size.height))
 
         addChild(scoreLabel)
     }

@@ -106,11 +106,10 @@ private extension GameScene {
         scoreLabel.name = Nodes.scoreHud.rawValue
         scoreLabel.fontSize = 25
         scoreLabel.fontColor = .red
+        scoreLabel.horizontalAlignmentMode = .center
+        scoreLabel.verticalAlignmentMode = .center
         scoreLabel.text = String(format: NSLocalizedString("game.scene.score.text", comment: ""), 0)
-        scoreLabel.position = CGPoint(
-            x: frame.size.width / 2,
-            y: size.height - (60 + scoreLabel.frame.size.height)
-        )
+        scoreLabel.position = CGPoint(x: size.width / 2, y: size.height - (60 + scoreLabel.frame.size.height))
 
         addChild(scoreLabel)
     }
